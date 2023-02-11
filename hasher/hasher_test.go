@@ -36,5 +36,17 @@ func TestRollOut(t *testing.T) {
 	adler32.Hash()
 	hash, removed := adler32.RollOut()
 	assert.Equal(t, hash, expectedHash)
-	assert.Equal(t, removed, uint8([]byte("a")[0]))
+	assert.Equal(t, uint8([]byte("a")[0]), removed)
+}
+
+func TestGetWindowLiterals(t *testing.T) {
+	adler32 := NewAdler32(4)
+	adler32.Write([]byte("Test"))
+	assert.Equal(t, []byte("Test"), adler32.GetWindowLiterals())
+}
+
+func TestGetWindowLength(t *testing.T) {
+	adler32 := NewAdler32(4)
+	adler32.RollIn([]byte("A")[0])
+	assert.Equal(t, 1, adler32.WindowLength())
 }

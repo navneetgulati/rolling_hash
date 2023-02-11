@@ -14,11 +14,11 @@ func main() {
 	currDir, _ := os.Getwd()
 	chunkSize := 64
 	if len(os.Args) > 1 {
-		newChunkSize,err := strconv.Atoi(os.Args[1])
-		if err !=nil{
-			fmt.Println(fmt.Errorf("Expected integer for chunk size. %v",err))
+		newChunkSize, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			fmt.Println(fmt.Errorf("expected integer for chunk size. Going with default value"))
 		}
-		chunkSize=newChunkSize
+		chunkSize = newChunkSize
 	}
 	filepath := path.Join(currDir, "mock_data/testData.txt")
 	if len(os.Args) > 2 {

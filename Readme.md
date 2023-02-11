@@ -11,7 +11,7 @@ Then this signature file as a reference to identify any changes in the updated f
 
 where
 
-`CHUNK_SIZE (Optional): Size of chunks that will be used for calculating signatures and rolling hash. Default value : 64 `
+`CHUNK_SIZE (Optional): Size of chunks that will be used for calculating signatures and rolling hash. Default value : 16 `
 
 `PATH_OF_ORIGINAL_FILE (Optional): Path to the file which will be used as base for comparison. Signatures will be generated on this file. Default value: mock_data/testData.txt`
 

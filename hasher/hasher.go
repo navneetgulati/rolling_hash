@@ -25,10 +25,6 @@ func (ad *adler32) WindowLength() int {
 	return len(ad.window)
 }
 
-func (ad *adler32) Sum(chunk []byte) {
-	ad.window = append(ad.window, chunk...)
-}
-
 // Writes chunk byte slice to the window byte slice.
 func (ad *adler32) Write(chunk []byte) {
 	ad.window = chunk
