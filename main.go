@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/gulatinavneet/rollingHash/differ"
 	"github.com/gulatinavneet/rollingHash/utils"
@@ -12,9 +13,16 @@ import (
 func main() {
 	currDir, _ := os.Getwd()
 	chunkSize := 64
-	filepath := path.Join(currDir, "mock_data/testData.txt")
 	if len(os.Args) > 1 {
-		filepath = os.Args[1]
+		newChunkSize,err := strconv.Atoi(os.Args[1])
+		if err !=nil{
+			fmt.Println(fmt.Errorf("Expected integer for chunk size. %v",err))
+		}
+		chunkSize=newChunkSize
+	}
+	filepath := path.Join(currDir, "mock_data/testData.txt")
+	if len(os.Args) > 2 {
+		filepath = os.Args[2]
 	}
 
 	fileReader := utils.New(chunkSize)
@@ -24,8 +32,8 @@ func main() {
 	}
 
 	updatedFilePath := path.Join(currDir, "mock_data/updatedTestData.txt")
-	if len(os.Args) > 2 {
-		updatedFilePath = os.Args[2]
+	if len(os.Args) > 3 {
+		updatedFilePath = os.Args[3]
 	}
 	updatedFileReader := utils.New(chunkSize)
 	updatedBuffReader, err := updatedFileReader.Open(updatedFilePath)
