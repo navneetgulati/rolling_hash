@@ -1,93 +1,73 @@
 package hasher
 
 import (
-	goAdler "hash/adler32"
-	"math"
-
 	"github.com/gulatinavneet/rollingHash/utils"
 )
 
-const ADLER_CONSTANT=65521
+// This constant is used as a modulo value when calculating Adler32 hash.
+const ADLER_CONSTANT = 65521
 
-type adler32 struct{
-	s1 uint
-	s2 uint
+type adler32 struct {
+	s1     uint
+	s2     uint
 	window []byte
 }
 
-func NewAdler32(chunkSize int) *adler32{
+func NewAdler32(chunkSize int) *adler32 {
 	return &adler32{
-		s1: 1,
-		s2: 0,
-		window: make([]byte,0, chunkSize),
+		s1:     1,
+		s2:     0,
+		window: make([]byte, 0, chunkSize),
 	}
 }
 
-func (ad *adler32) WindowLength() int{
+func (ad *adler32) WindowLength() int {
 	return len(ad.window)
 }
 
-func (ad *adler32) Sum(chunk []byte){
+func (ad *adler32) Sum(chunk []byte) {
 	ad.window = append(ad.window, chunk...)
 }
 
-func (ad *adler32)Write(chunk []byte){
+// Writes chunk byte slice to the window byte slice.
+func (ad *adler32) Write(chunk []byte) {
 	ad.window = chunk
 }
 
-func (ad *adler32) Hash() uint{
-	for _, val := range ad.window{
-		ad.s1+=uint(val)
-		ad.s2+=ad.s1
+func (ad *adler32) Hash() uint {
+	for _, val := range ad.window {
+		ad.s1 += uint(val)
+		ad.s2 += ad.s1
 	}
-	ad.s1=ad.s1%ADLER_CONSTANT
-	ad.s2=ad.s2%ADLER_CONSTANT
-	return ad.s2 << 16 + ad.s1
+	ad.s1 = ad.s1 % ADLER_CONSTANT
+	ad.s2 = ad.s2 % ADLER_CONSTANT
+	return ad.s2<<16 + ad.s1
 }
 
-func (ad *adler32) RollIn(c byte) (uint){
+// Appends a single byte c to the window byte slice. Calculates and returns the updated Adler hash.
+func (ad *adler32) RollIn(c byte) uint {
 	ad.window = append(ad.window, c)
 	ad.s1 = (ad.s1 + uint(c)) % ADLER_CONSTANT
-	ad.s2 = (ad.s2 + ad.s1 ) % ADLER_CONSTANT
-	return ad.s2 << 16 + ad.s1
+	ad.s2 = (ad.s2 + ad.s1) % ADLER_CONSTANT
+	return ad.s2<<16 + ad.s1
 }
 
-func (ad *adler32) RollOut() (uint,byte){
+// Removes the first item from the window byte slice. Calculates and returns the updated Adler hash and the removed byte.
+func (ad *adler32) RollOut() (uint, byte) {
 	removed := ad.window[0]
-	ad.s1 = (ad.s1 - uint(removed))%ADLER_CONSTANT
-	ad.s2 = (ad.s2 - (uint(len(ad.window))*uint(removed))-1)%ADLER_CONSTANT
+	//Adding Adler constant so that ad.s1 does not overflow during subtraction since it is an unsigned subtraction
+	ad.s1 = (ad.s1 + ADLER_CONSTANT - uint(removed)) % ADLER_CONSTANT
+	//Adding Adler constant as many times to make ad.s2 subtraction result positive in order to prevent overflow
+	ad.s2 = (ad.s2 + (1+uint(len(ad.window))*uint(removed)/ADLER_CONSTANT)*ADLER_CONSTANT - (uint(len(ad.window)) * uint(removed)) - 1) % ADLER_CONSTANT
 	ad.window = ad.window[1:]
-	return ad.s2 << 16 + ad.s1,removed
+	return ad.s2<<16 + ad.s1, removed
 }
 
-func (ad *adler32) GetWindowLiterals()[]byte{
+func (ad *adler32) GetWindowLiterals() []byte {
 	return ad.window
 }
 
-func (ad *adler32) Reset(){
+func (ad *adler32) Reset() {
 	utils.Clear(ad)
-	ad.s1=1
-}
-
-// func (roll *RollingHash) RollingHash(data []byte) map[int]uint{
-// 	var signatures map[int]uint
-// 	hash := polynomialHash(data[:roll.WindowSize])
-// 	signatures[0]=hash
-// 	for i :=roll.WindowSize;i<len(data);i++{
-// 		newHash := hash + uint(data[i])*uint(math.Pow(5,float64(roll.WindowSize-1)))
-// 		signatures[i-roll.WindowSize+1]=newHash
-// 	}
-// 	return signatures
-// }
-
-func polynomialHash(chunk []byte) uint{
-	var hash uint
-	for index,val:=range chunk{
-		hash += uint(val)*uint(math.Pow(5,float64(index)))
-	}
-	return hash
-}
-
-func GenerateAdlerHash(chunk []byte) uint32{
-	return goAdler.Checksum(chunk)
+	ad.s1 = 1
 }
