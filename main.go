@@ -12,7 +12,7 @@ import (
 
 func main() {
 	currDir, _ := os.Getwd()
-	chunkSize := 64
+	chunkSize := 16
 	if len(os.Args) > 1 {
 		newChunkSize, err := strconv.Atoi(os.Args[1])
 		if err != nil {

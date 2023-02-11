@@ -3,7 +3,7 @@
 This is an implementation of file diffing algorithm using adler32 rolling hash. 
 
 It first generates a signatures file from the original file contents. This signature file contains array of adler32 hashes constructed from the byte chunks of the original file.
-Then this signature file as a reference to identify any changes in the updated files.
+Then this signature file is used as a reference to identify any changes in the updated files.
 
 ## How to Run
 
